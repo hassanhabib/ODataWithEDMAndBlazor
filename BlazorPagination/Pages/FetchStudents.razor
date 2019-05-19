@@ -1,0 +1,77 @@
+﻿@page "/fetchstudents"
+@using BlazorPagination.Data
+@using BlazorPagination.Models
+@inject StudentsService StudentsService
+
+<h1>Students</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (students == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var student in students)
+            {
+                <tr>
+                    <td>@student.Id</td>
+                    <td>@student.Name</td>
+                    <td>@student.Score</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <label bind="nav">@count/@(skip + 1)</label>
+
+    if (top + skip > 1)
+    {
+        <button onclick=@Previous> ← </button>
+    }
+
+    if (top + skip < count)
+    {
+        <button onclick=@Next> → </button>
+    }
+}
+
+@functions {
+    List<Student> students;
+    int skip = 0;
+    int top = 1;
+    int count = 0;
+
+    protected override async Task OnInitAsync()
+    {
+        var response = await StudentsService.GetStudentsAsync(0, top);
+        count = response.Count;
+        students = response.Students;
+    }
+
+    async Task Next()
+    {
+        skip++;
+
+        var response = await StudentsService.GetStudentsAsync(skip, top);
+        students = response.Students;
+    }
+
+    async Task Previous()
+    {
+        skip--;
+
+        var response = await StudentsService.GetStudentsAsync(skip, top);
+        students = response.Students;
+    }
+}
